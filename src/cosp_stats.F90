@@ -336,13 +336,21 @@ END SUBROUTINE COSP_CHANGE_VERTICAL_GRID
     fracout_int(:,:,:) = NINT( fracout(:,:,:) )  !! assign an integer subpixcel ID (0=clear-sky; 1=St; 2=Cu)
 
     !! initialize
-    cfodd_ntotal(:,:,:,:)  = 0._wp
-    wr_occfreq_ntotal(:,:) = 0._wp
-    icod(:,:,:) = 0._wp
+    do i = 1, Npoints
+       if ( lwp(i) .eq. R_UNDEF ) then  ! for non-sunlit columns
+          cfodd_ntotal(i,:,:,:) = R_UNDEF
+          wr_occfreq_ntotal(i,:) = R_UNDEF
+          icod(i,:,:) = R_UNDEF
+       else
+          cfodd_ntotal(i,:,:,:)  = 0._wp
+          wr_occfreq_ntotal(i,:) = 0._wp
+          icod(i,:,:) = 0._wp
+       endif
+    enddo
 
     do i = 1, Npoints
        !! check by MODIS retrieval
-       if ( lwp(i)     .le.  CWP_THRESHOLD  .or.  &
+       if ( ( lwp(i) .le. CWP_THRESHOLD .and. lwp(i) .ne. R_UNDEF ) .or. &
           & liqcot(i)  .le.  COT_THRESHOLD  .or.  &
           & liqreff(i) .lt.  CFODD_BNDRE(1) .or.  &
           & liqreff(i) .gt.  CFODD_BNDRE(4) .or.  &
